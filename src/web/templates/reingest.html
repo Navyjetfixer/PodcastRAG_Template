@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Re-Ingest Episodes - Data Over Dogma</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 2em;
+        }
+
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 1.1em;
+        }
+
+        .warning-box {
+            background: #fff3cd;
+            border: 2px solid #ffc107;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+
+        .warning-box h3 {
+            color: #856404;
+            margin-bottom: 10px;
+        }
+
+        .warning-box p {
+            color: #856404;
+            line-height: 1.6;
+        }
+
+        .info-box {
+            background: #d1ecf1;
+            border: 2px solid #0c5460;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+
+        .info-box h3 {
+            color: #0c5460;
+            margin-bottom: 10px;
+        }
+
+        .info-box ul {
+            margin-left: 20px;
+            color: #0c5460;
+        }
+
+        .info-box li {
+            margin-bottom: 8px;
+        }
+
+        .button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 40px;
+            font-size: 18px;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin: 10px;
+            display: inline-block;
+        }
+
+        .button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .button:active {
+            transform: translateY(0);
+        }
+
+        .button-danger {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+
+        .button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        #status {
+            margin-top: 30px;
+            padding: 20px;
+            border-radius: 10px;
+            display: none;
+        }
+
+        .status-loading {
+            background: #d1ecf1;
+            border: 2px solid #0c5460;
+            color: #0c5460;
+        }
+
+        .status-success {
+            background: #d4edda;
+            border: 2px solid #28a745;
+            color: #155724;
+        }
+
+        .status-error {
+            background: #f8d7da;
+            border: 2px solid #dc3545;
+            color: #721c24;
+        }
+
+        .progress {
+            margin-top: 20px;
+        }
+
+        .progress-text {
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-top: 20px;
+            color: #667eea;
+            text-decoration: none;
+        }
+
+        .back-link:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📥 Re-Ingest Episodes</h1>
+        <p class="subtitle">Update all episodes with latest verse extraction</p>
+
+        <div class="warning-box">
+            <h3>⚠️ Warning</h3>
+            <p>
+                This will <strong>delete all existing episodes</strong> from the database and 
+                re-ingest them from the <code>transcripts/</code> directory with the latest 
+                Bible verse extraction logic.
+            </p>
+        </div>
+
+        <div class="info-box">
+            <h3>ℹ️ What This Does</h3>
+            <ul>
+                <li>Deletes all current episode data from Milvus</li>
+                <li>Re-processes all transcript files</li>
+                <li>Extracts Bible verse references using enhanced extractor</li>
+                <li>Generates new embeddings for semantic search</li>
+                <li>May take 10-30 minutes depending on episode count</li>
+            </ul>
+        </div>
+
+        <button class="button button-danger" onclick="confirmReingest()" id="reingestBtn">
+            🔄 Re-Ingest All Episodes
+        </button>
+
+        <button class="button" onclick="window.location.href='/episodes'">
+            ← Back to Episodes
+        </button>
+
+        <div id="status"></div>
+
+        <a href="/" class="back-link">← Back to Home</a>
+    </div>
+
+    <script>
+        async function confirmReingest() {
+            const confirmed = confirm(
+                'Are you ABSOLUTELY SURE you want to re-ingest all episodes?\n\n' +
+                'This will:\n' +
+                '• Delete all current episode data\n' +
+                '• Re-process all transcripts (10-30 minutes)\n' +
+                '• Cannot be undone\n\n' +
+                'Type "yes" to continue.'
+            );
+
+            if (!confirmed) return;
+
+            const button = document.getElementById('reingestBtn');
+            const statusDiv = document.getElementById('status');
+
+            button.disabled = true;
+            statusDiv.style.display = 'block';
+            statusDiv.className = 'status-loading';
+            statusDiv.innerHTML = `
+                <div class="progress">
+                    <div class="progress-text">⏳ Re-ingesting episodes...</div>
+                    <p>This may take 10-30 minutes. Please do not close this window.</p>
+                </div>
+            `;
+
+            try {
+                const response = await fetch('/api/episodes/reingest-all', {
+                    method: 'POST'
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    statusDiv.className = 'status-success';
+                    statusDiv.innerHTML = `
+                        <h3>✅ Re-Ingestion Complete!</h3>
+                        <p><strong>Episodes Processed:</strong> ${data.episodes_processed} / ${data.total_episodes}</p>
+                        ${data.errors && data.errors.length > 0 ? 
+                            '<p><strong>Errors:</strong></p><ul>' + 
+                            data.errors.map(e => '<li>' + e + '</li>').join('') + 
+                            '</ul>' : ''}
+                        <p style="margin-top: 20px;">
+                            <a href="/episodes" class="button">View Episodes</a>
+                        </p>
+                    `;
+                } else {
+                    throw new Error(data.message || 'Re-ingestion failed');
+                }
+
+            } catch (error) {
+                statusDiv.className = 'status-error';
+                statusDiv.innerHTML = `
+                    <h3>❌ Error</h3>
+                    <p>${error.message}</p>
+                `;
+            } finally {
+                button.disabled = false;
+            }
+        }
+    </script>
+</body>
+</html>

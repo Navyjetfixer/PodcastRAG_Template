@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Over Dogma - Podcast Search</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <!-- Back to Search Button (Floating) -->
+    <button id="backToSearchBtn" class="back-to-search-btn">
+        ⬆️ Back to Search
+    </button>
+
+<!-- Conversation Sidebar Toggle (Floating Button) -->
+<button id="conversationSidebarToggle" class="sidebar-toggle-btn" title="Open Conversations">
+    💬 <span id="sidebarMessageCount">0</span>
+</button>
+
+<!-- Conversation Sidebar -->
+<div id="conversationSidebar" class="conversation-sidebar">
+    <div class="sidebar-header">
+        <h3>💬 Conversation</h3>
+        <button id="closeSidebarBtn" class="close-btn">&times;</button>
+    </div>
+    
+    <div class="sidebar-content">
+        <div class="conversation-info-panel">
+            <div id="conversationHeader" class="conversation-name">No conversation</div>
+            <div id="messageCount" class="message-count">0 messages</div>
+        </div>
+        
+        <div class="conversation-controls">
+            <button id="newConversationBtn" class="control-btn">➕ New</button>
+            <button id="loadConversationBtn" class="control-btn">📂 Load</button>
+            <button id="renameConversationBtn" class="control-btn">✏️ Rename</button>
+            <button id="exportConversationBtn" class="control-btn">📤 Export</button>
+        </div>
+        
+        <div id="conversationHistory" class="conversation-history">
+            <p class="no-messages">No messages yet</p>
+        </div>
+    </div>
+</div>
+
+<!-- Sidebar Overlay -->
+<div id="sidebarOverlay" class="sidebar-overlay"></div>
+<!-- END OF SIDEBAR ADDITION ⬆️ -->
+
+    <!-- Header -->
+    <header>
+        <div class="container">
+            <img src="static/images/data_over_dogma.png" alt="Logo" width="128" height="128">
+            <h1> Data Over Dogma</h1>
+            <p class="subtitle">Semantic Search & AI Q&A for Podcast Transcripts</p>
+            <nav>
+                <a href="/" class="active">Search</a>
+                <a href="/ingest">Ingest</a>
+                <a href="/episodes">Episodes</a>
+                <a href="/transcribe">Transcribe</a>
+                <a href="/docs" target="_blank">API Docs</a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container">
+        <!-- Search Section (will become sticky on scroll) -->
+        <section class="search-section">
+            <h2>🔍 Search Transcripts</h2>
+
+            <!-- Search Form -->
+            <form id="searchForm" class="search-form" onsubmit="event.preventDefault(); performSearch();">
+                <input 
+                    type="text" 
+                    id="queryInput" 
+                    placeholder="Enter your search query or question..." 
+                    autocomplete="off"
+                    required
+                >
+                <div class="search-actions">
+                    <button type="submit" class="btn btn-primary">
+                        🔍 Search
+                    </button>
+                    <button type="button" onclick="askAI()" class="btn btn-success">
+                        🤖 Ask AI
+                    </button>
+                    <button type="button" onclick="clearHistory()" class="btn btn-danger">
+                        🗑️ Clear History
+                    </button>
+                </div>
+            </form>            
+
+            <!-- Advanced Filters (Collapsible) -->
+            <details class="filters-container" open>
+                <summary class="filters-header">
+                    <span>🎛️ Advanced Filters</span>
+                </summary>
+
+                <div class="filters-grid">
+                    <!-- Min Score -->
+                    <div class="filter-group">
+                        <label for="minScore">Min Score:</label>
+                        <input type="number" id="minScore" min="0" max="1" step="0.01" value="0.0">
+                    </div>
+
+                    <!-- Query Rewriting -->
+                    <div class="filter-group">
+                        <label>
+                            <input type="checkbox" id="queryRewriting" checked>
+                            Query Rewriting (AI enhancement)
+                        </label>
+                    </div>
+
+                    <!-- Use Context -->
+                    <div class="filter-group">
+                        <label>
+                            <input type="checkbox" id="useContext" checked>
+                            Use Conversation Context
+                        </label>
+                    </div>
+                </div>
+
+                <div class="filters-grid">
+                    <!-- Episode Filter -->
+                    <div class="filter-group">
+                        <label>Episode Filter:</label>
+                        <div class="multiselect">
+                            <div class="multiselect-selected" onclick="toggleDropdown('episode')">
+                                <span id="episodeDisplay">All Episodes</span>
+                                <span class="dropdown-arrow">▼</span>
+                            </div>
+                            <div id="episodeDropdown" class="multiselect-dropdown">
+                                <input type="text" id="episodeSearch" placeholder="Search episodes..." 
+                                       oninput="filterOptions('episode')" class="multiselect-search">
+                                <div id="episodeOptions" class="multiselect-options">
+                                    <div class="multiselect-option">
+                                        <input type="checkbox" id="ep-all" checked onchange="selectAllEpisodes()">
+                                        <label for="ep-all"><strong>All Episodes</strong></label>
+                                    </div>
+                                    <!-- Episodes loaded dynamically -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Has Verses Filter -->
+                    <div class="filter-group">
+                        <label>
+                            <input type="checkbox" id="hasVerses">
+                            Only segments with Bible verses
+                        </label>
+                    </div>
+
+                    <!-- Bible Books Filter -->
+                    <div class="filter-group">
+                        <label>Bible Books Filter:</label>
+                        <div class="multiselect">
+                            <div class="multiselect-selected" onclick="toggleDropdown('book')">
+                                <span id="bookDisplay">All Books</span>
+                                <span class="dropdown-arrow">▼</span>
+                            </div>
+                            <div id="bookDropdown" class="multiselect-dropdown">
+                                <input type="text" id="bookSearch" placeholder="Search books..." 
+                                       oninput="filterOptions('book')" class="multiselect-search">
+                                <div id="bookOptions" class="multiselect-options">
+                                    <div class="multiselect-option">
+                                        <input type="checkbox" id="book-all" checked onchange="selectAllBooks()">
+                                        <label for="book-all"><strong>All Books</strong></label>
+                                    </div>
+                                    <!-- Books loaded dynamically -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Word Count Range -->
+                <div class="filter-group">
+                    <label>Word Count Range:</label>
+                    <div class="range-inputs">
+                        <div>
+                            Min: <span id="minWordDisplay">0</span>
+                            <input type="range" id="minWords" min="0" max="5000" value="0" step="50">
+                        </div>
+                        <div>
+                            Max: <span id="maxWordDisplay">5000</span>
+                            <input type="range" id="maxWords" min="0" max="5000" value="5000" step="50">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Reset Button -->
+                <div class="filter-actions">
+                    <button type="button" onclick="resetFilters()" class="btn btn-secondary">
+                        🔄 Reset All Filters
+                    </button>
+                </div>
+
+                <!-- Active Filters Display -->
+                <div id="activeFilters" class="active-filters-panel" style="display: none;">
+                    <strong>Active Filters: </strong>
+                    <span id="activeFiltersText"></span>
+                </div>
+            </details>
+
+
+
+            <!-- Conversation Info Panel -->
+            <div id="conversationPanel" class="conversation-panel" style="display: none;">
+                💬 Conversation (<span id="conversationCount">0</span> messages)
+            </div>
+
+            <!-- Rewritten Query Display -->
+            <div id="rewrittenQueryPanel" class="info-panel" style="display: none;">
+                <strong>🔄 Rewritten Query:</strong>
+                <p id="rewrittenQuery"></p>
+            </div>
+
+            <!-- AI Answer Display -->
+            <div id="answerPanel" class="answer-panel" style="display: none;">
+                <h3>🤖 AI Answer</h3>
+                <div id="aiAnswer" class="ai-answer-text"></div>
+            </div>
+        </section>
+
+        <!-- Results Section -->
+        <section class="results-section">
+            <h3>📊 Search Results (<span id="resultCount">0</span>)</h3>
+            <div id="searchResults"></div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <p>© 2024 Data Over Dogma. Built with FastAPI + Milvus + OpenAI</p>
+        </div>
+    </footer>
+
+<!-- Verse Modal - CENTERED VERSION -->
+<div id="verseModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 id="verseReference">Loading...</h3>
+            <button class="modal-close" onclick="closeVerseModal()">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div id="verseText" class="verse-text-display">
+                <div class="loading">📖 Loading verse text...</div>
+            </div>
+            <div class="verse-actions">
+                <a id="bibleGatewayLink" href="#" target="_blank" class="verse-link">
+                    📖 Read on Bible Gateway
+                </a>
+                <a id="youVersionLink" href="#" target="_blank" class="verse-link">
+                    📱 Open in YouVersion
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="loading-overlay" style="display: none;">
+        <div class="spinner"></div>
+        <p>Loading...</p>
+    </div>
+
+    <script src="/static/js/app.js"></script>
+</body>
+</html>

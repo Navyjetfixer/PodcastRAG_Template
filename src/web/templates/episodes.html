@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+   
+    <title>Manage Episodes - Data Over Dogma</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <img src="static/images/data_over_dogma.png" alt="Logo" width="128" height="128">
+            <h1>Manage Episodes</h1>
+            <p class="subtitle">View and manage ingested episodes</p>
+            <nav>
+                <a href="/">Search</a>
+                <a href="/ingest">Ingest</a>
+                <a href="/episodes" class="active">Episodes</a>
+                <a href="/transcribe">Transcribe</a>
+                <a href="/docs" target="_blank">API Docs</a>
+            </nav>
+        </header>
+
+        <main>
+            <section class="episodes-section">
+                <div class="section-header">
+                    <h2>All Episodes</h2>
+                    <button id="refreshBtn" class="btn btn-secondary">🔄 Refresh</button>
+                </div>
+                
+                <div id="episodesList" class="episodes-list">
+                    <p class="loading">Loading episodes...</p>
+                </div>
+            </section>
+        </main>
+
+        <footer>
+            <p>&copy; 2024 Data Over Dogma</p>
+        </footer>
+    </div>
+
+    <script src="/static/js/episodes.js"></script>
+</body>
+</html>

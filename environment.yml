@@ -1,0 +1,67 @@
+name: podcast-rag
+channels:
+  - pytorch
+  - nvidia
+  - conda-forge
+  - defaults
+
+dependencies:
+  # Python
+  - python=3.13
+
+  # PyTorch with CUDA support (automatically handles CUDA toolkit)
+  - pytorch>=2.0
+  - torchvision
+  - torchaudio
+  - pytorch-cuda=12.1
+
+  # Core ML/AI dependencies
+  - numpy
+  - scipy
+  - scikit-learn
+
+  # Web framework
+  - pip
+
+  # Install remaining dependencies via pip (not available in conda or better via pip)
+  - pip:
+      # Vector Database
+      - pymilvus>=2.6.2
+
+      # Embeddings & NLP
+      - sentence-transformers>=5.1.2
+      - transformers
+
+      # LLM Integration
+      - openai>=2.6.1
+
+      # Configuration
+      - python-dotenv>=1.2.1
+      - pydantic>=2.12.3
+      - pydantic-settings>=2.11.0
+      - pyyaml>=6.0
+
+      # CLI Tools
+      - typer[all]>=0.20.0
+      - rich>=14.2.0
+
+      # Podcast Processing
+      - feedparser>=6.0.12
+      - faster-whisper>=1.2.1
+
+      # Web Framework & Server
+      - fastapi>=0.120.0
+      - uvicorn[standard]>=0.38.0
+      - python-multipart>=0.0.20
+      - jinja2>=3.1.6
+      - sse-starlette>=3.0.2
+
+      # Development Tools
+      - pytest>=8.4.2
+      - black>=25.9.0
+      - flake8>=7.3.0
+
+# Environment variables (optional - can also use .env file)
+# OPENAI_API_KEY=your_key_here
+# MILVUS_HOST=localhost
+# MILVUS_PORT=19530

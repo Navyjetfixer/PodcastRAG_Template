@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Over Dogma - Podcast Search</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <style>
+         .navbar {
+            background: var(--card-bg);
+            box-shadow: var(--shadow);
+            margin-bottom: 30px;
+        }
+
+        .navbar .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 30px;
+        }
+
+        .nav-brand {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .nav-brand h1 {
+            font-size: 2.5em;
+            color: var(--primary-color);
+            margin: 0 0 10px 0;
+        }
+
+        .nav-brand p {
+            color: var(--text-secondary);
+            font-size: 1.1em;
+            margin: 0;
+        }
+
+        .nav-links {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .nav-links a {
+            color: var(--text-primary);
+            text-decoration: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            transition: all 0.3s;
+            font-weight: 500;
+        }
+
+        .nav-links a:hover,
+        .nav-links a.active {
+            background: var(--primary-color);
+            color: white;
+        }
+        /* Advanced Filters Panel */
+        .filters-panel {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .filter-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .multiselect {
+            position: relative;
+        }
+
+        .multiselect-display {
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            background: white;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .multiselect-display:hover {
+            border-color: var(--primary-color);
+        }
+
+        .multiselect-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            margin-top: 5px;
+            max-height: 300px;
+            overflow-y: auto;
+            z-index: 1000;
+            box-shadow: var(--shadow-lg);
+            display: none;
+        }
+
+        .multiselect-dropdown.open {
+            display: block;
+        }
+
+        .multiselect-search {
+            padding: 10px;
+            border-bottom: 1px solid var(--border-color);
+            position: sticky;
+            top: 0;
+            background: white;
+        }
+
+        .multiselect-search input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+        }
+
+        .multiselect-option {
+            padding: 10px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .multiselect-option:hover {
+            background: var(--bg-secondary);
+        }
+
+        .slider-values {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        .slider {
+            width: 100%;
+            height: 6px;
+            border-radius: 3px;
+            background: var(--border-color);
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: var(--primary-color);
+            cursor: pointer;
+        }
+
+        .slider::-moz-range-thumb {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: var(--primary-color);
+            cursor: pointer;
+            border: none;
+        }
+
+        .active-filters {
+            background: var(--bg-secondary);
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            font-size: 14px;
+        }
+
+        .filter-badge {
+            display: inline-block;
+            background: var(--primary-color);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            margin-right: 5px;
+            margin-bottom: 5px;
+        }
+
+        .result-card {
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: var(--shadow);
+            border-left: 4px solid var(--primary-color);
+        }
+
+        .result-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .result-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--primary-color);
+            margin: 0;
+        }
+
+        .result-score {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--success-color);
+        }
+
+        .result-meta {
+            color: var(--text-secondary);
+            font-size: 13px;
+            margin-bottom: 15px;
+        }
+
+        .result-text {
+            line-height: 1.8;
+            margin-bottom: 15px;
+        }
+
+        .result-verses {
+            background: var(--bg-secondary);
+            padding: 10px;
+            border-radius: 6px;
+            margin-top: 10px;
+        }
+
+        .verse-reference {
+            display: inline-block;
+            background: var(--primary-color);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            margin-right: 5px;
+            margin-bottom: 5px;
+        }
+
+        .book-tag {
+            display: inline-block;
+            background: var(--secondary-color);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            margin-right: 5px;
+            margin-bottom: 5px;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-brand">
+                <h1>🎙️ Data Over Dogma</h1>
+                <p>Semantic Search & AI Q&A for Podcast Transcripts</p>
+            </div>
+            <div class="nav-links">
+                <a href="/" class="active">Search</a>
+                <a href="/ingest">Ingest</a>
+                <a href="/episodes">Episodes</a>
+                <a href="/docs" target="_blank">API Docs</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container">
+        <section>
+            <h2>🔍 Search Transcripts</h2>
+            
+            <!-- Search Input -->
+            <div class="form-group">
+                <textarea 
+                    id="queryInput" 
+                    rows="3" 
+                    placeholder="Ask a question or search... (e.g., 'What does Paul say about the law?')"
+                ></textarea>
+            </div>
+
+            <!-- Advanced Filters -->
+            <div class="filters-panel">
+                <h3 style="margin-top: 0; color: var(--primary-color); font-size: 18px;">🎛️ Advanced Filters</h3>
+                
+                <div class="filter-row">
+                    <div class="form-group">
+                        <label for="topK">Results:</label>
+                        <input type="number" id="topK" value="5" min="1" max="20">
+                    </div>
+                    <div class="form-group">
+                        <label for="minScore">Min Score:</label>
+                        <input type="number" id="minScore" value="0.0" min="0" max="1" step="0.1">
+                    </div>
+                </div>
+
+                <div class="checkbox-label">
+                    <input type="checkbox" id="queryRewriting" checked>
+                    <label for="queryRewriting">Query Rewriting (AI enhancement)</label>
+                </div>
+                <div class="checkbox-label">
+                    <input type="checkbox" id="useContext" checked>
+                    <label for="useContext">Use Conversation Context</label>
+                </div>
+
+                <div class="form-group" style="margin-top: 20px;">
+                    <label>Episode Filter:</label>
+                    <div class="multiselect" id="episodeMultiselect">
+                        <div class="multiselect-display" onclick="window.toggleDropdown('episode')">
+                            <span id="episodeDisplay">All Episodes</span>
+                            <span>▼</span>
+                        </div>
+                        <div class="multiselect-dropdown" id="episodeDropdown">
+                            <div class="multiselect-search">
+                                <input type="text" id="episodeSearch" placeholder="Search episodes..." onkeyup="window.filterOptions('episode')">
+                            </div>
+                            <div id="episodeOptions">
+                                <div class="multiselect-option">
+                                    <input type="checkbox" id="ep-all" onchange="window.selectAllEpisodes()" checked>
+                                    <label for="ep-all">All Episodes</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="checkbox-label" style="margin-top: 20px;">
+                    <input type="checkbox" id="hasVerses">
+                    <label for="hasVerses">Only segments with Bible verses</label>
+                </div>
+
+                <div class="form-group">
+                    <label>Bible Books Filter:</label>
+                    <div class="multiselect" id="bookMultiselect">
+                        <div class="multiselect-display" onclick="window.toggleDropdown('book')">
+                            <span id="bookDisplay">All Books</span>
+                            <span>▼</span>
+                        </div>
+                        <div class="multiselect-dropdown" id="bookDropdown">
+                            <div class="multiselect-search">
+                                <input type="text" id="bookSearch" placeholder="Search books..." onkeyup="window.filterOptions('book')">
+                            </div>
+                            <div id="bookOptions">
+                                <div class="multiselect-option">
+                                    <input type="checkbox" id="book-all" onchange="window.selectAllBooks()" checked>
+                                    <label for="book-all">All Books</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group" style="margin-top: 20px;">
+                    <label>Word Count Range:</label>
+                    <div class="slider-values">
+                        <span>Min: <strong id="minWordDisplay">0</strong></span>
+                        <span>Max: <strong id="maxWordDisplay">5000</strong></span>
+                    </div>
+                    <input type="range" id="minWords" class="slider" min="0" max="5000" value="0" step="50">
+                    <input type="range" id="maxWords" class="slider" min="0" max="5000" value="5000" step="50">
+                </div>
+
+                <button class="btn btn-secondary" onclick="window.resetFilters()" style="width: 100%; margin-top: 15px;">
+                    🔄 Reset All Filters
+                </button>
+            </div>
+
+            <!-- Active Filters Display -->
+            <div class="active-filters" id="activeFilters" style="display: none;">
+                <strong>Active Filters:</strong> <span id="activeFiltersText"></span>
+            </div>
+
+            <!-- Search Buttons -->
+            <div style="display: flex; gap: 10px; margin-bottom: 20px;">
+                <button class="btn btn-primary" onclick="window.performSearch()" style="flex: 1;">
+                    🔍 Search
+                </button>
+                <button class="btn btn-secondary" onclick="window.askAI()" style="flex: 1;">
+                    🤖 Ask AI
+                </button>
+                <button class="btn btn-secondary" onclick="window.clearHistory()">
+                    🗑️ Clear History
+                </button>
+            </div>
+
+            <!-- Conversation Info -->
+            <div id="conversationPanel" style="display: none; background: var(--bg-secondary); padding: 12px; border-radius: 6px; margin-bottom: 20px;">
+                💬 Conversation (<span id="conversationCount">0</span> messages)
+            </div>
+
+            <!-- Rewritten Query Display -->
+            <div id="rewrittenQueryPanel" style="display: none; margin-bottom: 20px;">
+                <h3>🔄 Rewritten Query:</h3>
+                <div id="rewrittenQuery" style="background: var(--bg-secondary); padding: 15px; border-radius: 6px;"></div>
+            </div>
+
+            <!-- AI Answer -->
+            <div id="answerPanel" style="display: none; margin-bottom: 20px;">
+                <h3>🤖 AI Answer</h3>
+                <div id="aiAnswer" style="background: var(--bg-secondary); padding: 20px; border-radius: 8px; line-height: 1.8;"></div>
+            </div>
+
+            <!-- Search Results -->
+            <div id="resultsPanel">
+                <h3>📊 Search Results (<span id="resultCount">0</span>)</h3>
+                <div id="searchResults"></div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>© 2024 Data Over Dogma. Built with FastAPI + Milvus + OpenAI</p>
+    </footer>
+
+    <script src="/static/js/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,197 @@
+# Podcast RAG Configuration
+# Copy this file and customize it for your podcast
+
+# ============================================================================
+# PODCAST INFORMATION
+# ============================================================================
+podcast:
+  # iTunes podcast ID (find it in the iTunes URL or API)
+  itunes_id: "1681418502"
+
+  # Display name for your podcast
+  name: "Your Podcast Name"
+
+  # Short description
+  description: "A brief description of your podcast"
+
+  # Podcast website or homepage
+  url: "https://yourpodcast.com"
+
+  # Logo/cover art (place in src/web/static/images/)
+  logo: "podcast_logo.png"
+
+# ============================================================================
+# BRANDING & UI
+# ============================================================================
+branding:
+  # Application title (shown in browser tab and header)
+  app_title: "Podcast Search"
+
+  # Primary color (hex code)
+  primary_color: "#3B82F6"
+
+  # Secondary color (hex code)
+  secondary_color: "#8B5CF6"
+
+  # Accent color for highlights
+  accent_color: "#10B981"
+
+# ============================================================================
+# VECTOR DATABASE (MILVUS)
+# ============================================================================
+milvus:
+  # Milvus host
+  host: "localhost"
+
+  # Milvus port
+  port: 19530
+
+  # Collection name (change for different podcasts to keep data separate)
+  collection_name: "podcast_segments"
+
+  # Vector dimension (384 for all-MiniLM-L6-v2, don't change unless changing embedding model)
+  vector_dim: 384
+
+# ============================================================================
+# EMBEDDING MODEL
+# ============================================================================
+embeddings:
+  # Sentence transformer model name
+  # Options: all-MiniLM-L6-v2 (fast, 384 dim), all-mpnet-base-v2 (quality, 768 dim)
+  model: "all-MiniLM-L6-v2"
+
+  # Dimension (must match model output)
+  dimension: 384
+
+  # Device: auto, cuda, cpu
+  device: "auto"
+
+# ============================================================================
+# LLM SETTINGS (OpenAI)
+# ============================================================================
+llm:
+  # OpenAI model to use
+  model: "gpt-4o-mini"
+
+  # Temperature (0.0 = deterministic, 1.0 = creative)
+  temperature: 0.7
+
+  # Max tokens for responses
+  max_tokens: 500
+
+  # System prompt customization
+  system_prompt: |
+    You are a helpful AI assistant that answers questions based on podcast transcripts.
+    Provide accurate, concise answers using the context provided.
+    If you don't know the answer, say so.
+
+# ============================================================================
+# SEARCH & RETRIEVAL
+# ============================================================================
+search:
+  # Default number of results to return
+  default_top_k: 5
+
+  # Minimum similarity score (0.0 to 1.0)
+  min_score: 0.3
+
+  # Maximum context length for Q&A (in characters)
+  max_context_length: 10000
+
+  # Enable re-ranking
+  use_reranker: true
+
+  # Re-ranker model: fast, balanced, quality, large
+  reranker_model: "balanced"
+
+  # Number of candidates to re-rank
+  reranker_candidates: 20
+
+# ============================================================================
+# TRANSCRIPTION
+# ============================================================================
+transcription:
+  # Whisper model: tiny.en, base.en, small.en, medium.en, large-v3
+  whisper_model: "tiny.en"
+
+  # Use faster-whisper (recommended, 4-10x faster)
+  use_faster_whisper: true
+
+  # Beam size (1=fastest, 5=best quality)
+  beam_size: 5
+
+  # Enable Voice Activity Detection (skip silence)
+  vad_filter: true
+
+  # Save timestamped transcripts (.srt format)
+  save_timestamps: true
+
+# ============================================================================
+# CHUNKING STRATEGY
+# ============================================================================
+chunking:
+  # Chunk size in characters
+  chunk_size: 3500
+
+  # Overlap between chunks
+  chunk_overlap: 200
+
+  # Strategy: fixed, semantic, sliding
+  strategy: "fixed"
+
+# ============================================================================
+# WEB SERVER
+# ============================================================================
+web:
+  # Host to bind to
+  host: "0.0.0.0"
+
+  # Port to listen on
+  port: 8000
+
+  # Enable auto-reload in development
+  reload: true
+
+  # Number of workers (production)
+  workers: 1
+
+# ============================================================================
+# FILE PATHS
+# ============================================================================
+paths:
+  # Directory for transcript files
+  transcripts_dir: "./transcripts"
+
+  # Directory for data files
+  data_dir: "./data"
+
+  # Directory for logs
+  logs_dir: "./logs"
+
+# ============================================================================
+# FEATURE FLAGS
+# ============================================================================
+features:
+  # Enable conversation history
+  conversations: true
+
+  # Enable episode management UI
+  episode_management: true
+
+  # Enable transcription UI
+  transcription_ui: true
+
+  # Enable search analytics
+  analytics: false
+
+  # Custom metadata fields (add your own fields)
+  custom_metadata:
+    enabled: false
+    fields: []
+    # Example:
+    # - name: "speaker"
+    #   type: "string"
+    #   searchable: true
+    # - name: "season"
+    #   type: "integer"
+    #   searchable: true

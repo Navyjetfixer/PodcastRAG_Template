@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Podcast Transcription - Data Over Dogma</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <!-- Hero Section (matching index.html) -->
+    <header>
+        <div class="container">
+            <img src="static/images/data_over_dogma.png" alt="Logo" width="128" height="128">
+            <h1>Data Over Dogma</h1>
+            <p class="subtitle">Semantic Search & AI Q&A for Podcast Transcripts</p>
+            
+            <!-- Navigation Tabs -->
+            <nav>
+                <a href="/search">Search</a>
+                <a href="/ingest">Ingest</a>
+                <a href="/episodes">Episodes</a>
+                <a href="/" class="active">Transcribe</a>
+                <a href="/docs" target="_blank">API Docs</a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <div class="container">
+        <div class="search-section">
+            <h2>🎙️ Podcast Transcription</h2>
+            <p class="section-description">Download and transcribe podcast episodes using Whisper AI</p>
+
+            <!-- Configuration Section -->
+            <div class="config-panel">
+                <h3>⚙️ Configuration</h3>
+                
+                <div class="config-grid">
+                    <div class="config-item">
+                        <label for="podcastId">Podcast ID</label>
+                        <input type="text" id="podcastId" value="1681418502" placeholder="iTunes Podcast ID">
+                        <small>iTunes podcast ID (default: Data Over Dogma)</small>
+                    </div>
+
+                    <div class="config-item">
+                        <label for="maxEpisodes">Max Episodes</label>
+                        <input type="number" id="maxEpisodes" value="1" min="1" max="50">
+                        <small>Maximum number of episodes to process</small>
+                    </div>
+
+                    <div class="config-item">
+                        <label for="whisperModel">Whisper Model</label>
+                        <select id="whisperModel">
+                            <option value="tiny.en" selected>tiny.en (fastest)</option>
+                            <option value="tiny">tiny</option>
+                            <option value="base.en">base.en</option>
+                            <option value="base">base</option>
+                            <option value="small.en">small.en</option>
+                            <option value="small">small</option>
+                            <option value="medium.en">medium.en</option>
+                            <option value="medium">medium</option>
+                            <option value="large">large</option>
+                            <option value="large-v2">large-v2</option>
+                            <option value="large-v3">large-v3 (best quality)</option>
+                        </select>
+                        <small>Larger models = better quality but slower</small>
+                    </div>
+
+                    <div class="config-item">
+                        <label for="beamSize">Beam Size</label>
+                        <input type="number" id="beamSize" value="5" min="1" max="10">
+                        <small>1=fastest, 5=best quality</small>
+                    </div>
+                </div>
+
+                <!-- Checkboxes -->
+                <div class="config-options">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="useTimestamps" checked>
+                        <span>Include timestamps (SRT format)</span>
+                    </label>
+
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="reprocess">
+                        <span>Reprocess already transcribed episodes</span>
+                    </label>
+
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="useOpenAI">
+                        <span>Use OpenAI Whisper (slower, more compatible)</span>
+                    </label>
+
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="disableVAD">
+                        <span>Disable VAD (Voice Activity Detection)</span>
+                    </label>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="button-group">
+                    <button class="btn btn-primary" id="startBtn" onclick="startTranscription()">
+                        🚀 Start Transcription
+                    </button>
+                    <button class="btn btn-secondary" id="stopBtn" onclick="stopTranscription()" disabled>
+                        ⏹️ Stop
+                    </button>
+                    <button class="btn btn-info" onclick="fetchPodcastInfo()">
+                        🔍 Preview Podcast Info
+                    </button>
+                </div>
+            </div>
+
+            <!-- Podcast Info Display -->
+            <div id="podcastInfoSection" class="info-panel" style="display: none;">
+                <div class="podcast-info-card">
+                    <h3 id="podcastName">Loading...</h3>
+                    <p id="podcastStats"></p>
+                </div>
+            </div>
+
+            <!-- Progress Section -->
+            <div class="progress-section" id="progressContainer" style="display: none;">
+                <h3>📊 Progress</h3>
+                <div class="progress-bar-container">
+                    <div class="progress-bar" id="progressBar" style="width: 0%">
+                        <span class="progress-text" id="progressText">0%</span>
+                    </div>
+                </div>
+                <div class="progress-details">
+                    <p><strong>Status:</strong> <span id="overallStatus">Initializing...</span></p>
+                    <p><strong>Episodes:</strong> <span id="episodeCounter">0/0</span></p>
+                    <p><strong>Current:</strong> <span id="currentEpisode">-</span></p>
+                </div>
+            </div>
+
+            <!-- Episodes List -->
+            <div class="episodes-section">
+                <h3>📝 Episodes</h3>
+                <div id="episodesList">
+                    <p class="no-data">No episodes being processed</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <p>&copy; 2024 Data Over Dogma - Podcast Transcription System</p>
+    </footer>
+
+    <script src="/static/js/transcribe.js"></script>
+</body>
+</html>

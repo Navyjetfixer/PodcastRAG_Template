@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ingest Episodes - Data Over Dogma</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <style>
+        /* Navbar styles to match main page */
+        .navbar {
+            background: var(--card-bg);
+            box-shadow: var(--shadow);
+            margin-bottom: 30px;
+        }
+
+        .navbar .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 30px;
+        }
+
+        .nav-brand {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .nav-brand h1 {
+            font-size: 2.5em;
+            color: var(--primary-color);
+            margin: 0 0 10px 0;
+        }
+
+        .nav-brand p {
+            color: var(--text-secondary);
+            font-size: 1.1em;
+            margin: 0;
+        }
+
+        .nav-links {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .nav-links a {
+            color: var(--text-primary);
+            text-decoration: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            transition: all 0.3s;
+            font-weight: 500;
+        }
+
+        .nav-links a:hover,
+        .nav-links a.active {
+            background: var(--primary-color);
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar matching main page -->
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-brand">
+                <img src="static/images/data_over_dogma.png" alt="Logo" width="128" height="128">
+                <h1>Data Over Dogma</h1>
+                <p>Semantic Search & AI Q&A for Podcast Transcripts</p>
+            </div>
+            <div class="nav-links">
+                <a href="/">Search</a>
+                <a href="/ingest" class="active">Ingest</a>
+                <a href="/episodes">Episodes</a>
+                <a href="/transcribe">Transcribe</a>
+                <a href="/docs" target="_blank">API Docs</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container">
+        <!-- Upload Single Episode Section -->
+        <section>
+            <h2>📤 Upload Single Episode</h2>
+            <div class="upload-form">
+                <div class="form-group">
+                    <label for="episodeJson">Episode JSON File:</label>
+                    <input type="file" id="episodeJson" accept=".json">
+                    <small>Contains episode metadata (title, description, etc.)</small>
+                </div>
+
+                <div class="form-group">
+                    <label for="transcriptSrt">Transcript SRT File:</label>
+                    <input type="file" id="transcriptSrt" accept=".srt">
+                    <small>Subtitle file with timestamps and text</small>
+                </div>
+
+                <div class="checkbox-label">
+                    <input type="checkbox" id="forceOverwrite">
+                    <label for="forceOverwrite">Force overwrite if episode exists</label>
+                </div>
+
+                <div class="form-group">
+                    <label for="chunkSize">Chunk Size (characters):</label>
+                    <input type="number" id="chunkSize" value="3500" min="500" max="5000" step="100">
+                    <small>Semantic chunking size for better search relevance</small>
+                </div>
+
+                <button class="btn btn-primary" onclick="uploadEpisode()">📤 Upload & Ingest</button>
+            </div>
+
+            <div id="uploadStatus" class="status" style="display: none;"></div>
+            <div id="uploadProgress" style="display: none;">
+                <div style="width: 100%; height: 8px; background: var(--border-color); border-radius: 4px; overflow: hidden; margin-top: 15px;">
+                    <div id="progressFill" style="height: 100%; width: 0%; background: linear-gradient(90deg, var(--primary-color), var(--success-color)); transition: width 0.3s;"></div>
+                </div>
+                <p id="progressText" style="text-align: center; margin-top: 10px; color: var(--primary-color); font-weight: 600;"></p>
+            </div>
+        </section>
+
+        <!-- Ingest from Folder Section -->
+        <section>
+            <h2>📂 Ingest from Folder</h2>
+            <div class="upload-form">
+                <div class="form-group">
+                    <label for="folderPath">Folder Path:</label>
+                    <input type="text" id="folderPath" placeholder="e.g., C:\transcripts or /data/transcripts">
+                    <small>Server-side folder path containing episode JSON and SRT files</small>
+                </div>
+
+                <div class="form-group">
+                    <label for="maxEpisodes">Max Episodes (optional):</label>
+                    <input type="number" id="maxEpisodes" placeholder="Leave empty to ingest all" min="1">
+                    <small>Limit the number of episodes to process</small>
+                </div>
+
+                <div class="checkbox-label">
+                    <input type="checkbox" id="skipExisting" checked>
+                    <label for="skipExisting">Skip existing episodes</label>
+                </div>
+
+                <div class="form-group">
+                    <label for="folderChunkSize">Chunk Size (characters):</label>
+                    <input type="number" id="folderChunkSize" value="3500" min="500" max="5000" step="100">
+                    <small>Semantic chunking size for better search relevance</small>
+                </div>
+
+                <button class="btn btn-primary" onclick="ingestFolder()">📂 Ingest Folder</button>
+            </div>
+
+            <div id="folderStatus" class="status" style="display: none;"></div>
+            <div id="folderProgress" style="display: none;">
+                <div style="width: 100%; height: 8px; background: var(--border-color); border-radius: 4px; overflow: hidden; margin-top: 15px;">
+                    <div id="folderProgressFill" style="height: 100%; width: 0%; background: linear-gradient(90deg, var(--primary-color), var(--success-color)); transition: width 0.3s;"></div>
+                </div>
+                <p id="folderProgressText" style="text-align: center; margin-top: 10px; color: var(--primary-color); font-weight: 600;"></p>
+            </div>
+        </section>
+
+        <!-- Recent Jobs Section -->
+        <section>
+            <div class="section-header">
+                <h2>📜 Recent Ingestion Jobs</h2>
+                <button class="btn btn-secondary" onclick="loadJobs()">🔄 Refresh</button>
+            </div>
+            <div id="jobsList">
+                <p class="loading">Loading jobs...</p>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>© 2024 Data Over Dogma. Built with FastAPI + Milvus + OpenAI</p>
+    </footer>
+
+    <script src="/static/js/ingest.js"></script>
+</body>
+</html>
