@@ -30,7 +30,107 @@ A production-ready **RAG (Retrieval-Augmented Generation)** system for podcast t
 
 - **Conda** (Miniconda or Anaconda)
 - **OpenAI API Key** ([Get one here](https://platform.openai.com/api-keys))
-- **Milvus** running locally or remotely
+- **Docker** (optional, for Milvus)
+
+### Easy Setup (Recommended for Windows)
+
+**Use the automated setup script to configure everything in one go:**
+
+#### Step-by-Step with setup.bat
+
+**1. Clone and navigate to the repository:**
+```cmd
+git clone <your-repo-url>
+cd PodcastRAG_Template
+```
+
+**2. Run the setup script:**
+```cmd
+setup.bat
+```
+
+**3. Follow the interactive prompts:**
+
+The script will guide you through:
+
+```
+Checking prerequisites...
+[OK] Conda found
+[OK] Docker found
+
+Setting up Conda environment...
+Environment name [podcast-rag]: <press Enter or type custom name>
+
+# Script creates conda environment automatically
+
+Setting up environment variables...
+Enter your OpenAI API key (or press Enter to skip): sk-your-key-here
+# Note: If you have OPENAI_API_KEY in system environment, just press Enter
+
+Creating directory structure...
+[OK] Directories created
+
+Configuring your podcast...
+Podcast iTunes ID: 1234567890
+Podcast Name: My Awesome Podcast
+Podcast Description: A podcast about awesome things
+
+[OK] Podcast configuration updated
+
+Setting up Milvus vector database...
+Start Milvus with Docker? (y/n): y
+[OK] Milvus started
+
+============================================================================
+Setup Complete!
+============================================================================
+
+Start the application now? (y/n): y
+```
+
+**4. Access your application:**
+- Main Search: http://localhost:8000
+- API Docs: http://localhost:8000/docs
+
+**That's it!** The script has:
+- ✅ Created conda environment with all dependencies
+- ✅ Configured your podcast details
+- ✅ Set up environment variables
+- ✅ Created directory structure
+- ✅ Started Milvus (if you selected yes)
+- ✅ Launched the application (if you selected yes)
+
+**Helpful Tips:**
+
+💡 **Already have OpenAI API key in system environment?**
+   - Just press Enter when prompted for the API key
+   - The app will use your system environment variable automatically
+
+💡 **Want to skip automatic startup?**
+   - Answer 'n' when asked "Start the application now?"
+   - Run manually later with: `conda activate podcast-rag && python run_web.py`
+
+💡 **Need to reconfigure later?**
+   - Edit `podcast_config.yaml` for podcast settings
+   - Edit `.env` for environment variables
+   - Re-run `setup.bat` to update (it detects existing setup)
+
+#### For Linux/Mac Users
+
+Use `setup.sh` instead:
+
+```bash
+chmod +x setup.sh
+./setup.sh
+```
+
+The interactive prompts are identical.
+
+---
+
+### Manual Setup (Alternative)
+
+If you prefer to set up manually or need more control:
 
 ### 1. Clone the Repository
 
